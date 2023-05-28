@@ -55,7 +55,7 @@
             android:textColor="#F44336" />
 
         <com.github.leandroborgesferreira.loadingbutton.customViews.CircularProgressButton
-            android:id="@+id/cirRegisterButton"
+            android:id="@+id/cirLoginButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -73,6 +73,7 @@
             app:spinning_bar_width="4dp" />
 
         <TextView
+            android:id="@+id/registerButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
