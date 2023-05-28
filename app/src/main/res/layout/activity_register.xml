@@ -32,7 +32,7 @@
             android:layout_marginTop="30dp"
             android:layout_marginRight="20dp"
             android:ems="10"
-            android:hint="Name"
+            android:hint="Name (You will remain anonymous)"
             android:inputType="textPersonName" />
 
         <EditText
