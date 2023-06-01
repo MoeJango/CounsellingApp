@@ -18,6 +18,9 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
 
         name = findViewById(R.id.editTextName);
         password = findViewById(R.id.editTextPassword);
@@ -63,8 +66,8 @@ public class RegisterActivity extends AppCompatActivity {
         // This can be the same logic as in the LoginActivity.authenticateUser()
 
         // If the authentication is successful, proceed to the next activity
-        Intent intent = new Intent(RegistrationActivity.this, HomeActivity.class);
-        startActivity(intent);
-        finish();
+        //Intent intent = new Intent(RegistrationActivity.this, HomeActivity.class);
+        //startActivity(intent);
+        //finish();
     }
 }
