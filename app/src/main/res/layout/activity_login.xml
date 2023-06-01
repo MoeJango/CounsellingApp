@@ -20,7 +20,7 @@
 
     <LinearLayout
         android:id="@+id/linearLayout"
-        android:layout_width="413dp"
+        android:layout_width="match_parent"
         android:layout_height="400dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -99,7 +99,7 @@
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="40dp"
+        android:layout_marginStart="40dp"
         android:layout_marginTop="54dp"
         android:text="Welcome \nback"
         android:textColor="#FFFFFF"
