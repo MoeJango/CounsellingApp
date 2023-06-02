@@ -16,12 +16,10 @@
             android:exported="false" />
         <activity
             android:name=".RegisterActivity"
-            android:exported="false"
-            android:windowSoftInputMode="stateVisible|adjustResize"/>
+            android:exported="false" />
         <activity
             android:name=".LoginActivity"
-            android:exported="true"
-            android:windowSoftInputMode="stateVisible|adjustResize"/>
+            android:exported="true" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

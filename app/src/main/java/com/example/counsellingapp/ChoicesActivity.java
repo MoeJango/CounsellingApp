@@ -22,8 +22,10 @@ public class ChoicesActivity extends AppCompatActivity {
     private Chip conflict;
     private Chip life;
     private FloatingActionButton next;
+    private TextView main;
     private TextView error;
     private ArrayList<String> issues = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +35,7 @@ public class ChoicesActivity extends AppCompatActivity {
             getSupportActionBar().hide();
         }
 
+        Bundle bundle = getIntent().getExtras();
         relChallenges = findViewById(R.id.chipRelChallenges);
         trauma = findViewById(R.id.chipTrauma);
         selfEsteem = findViewById(R.id.chipSelfEsteem);
@@ -40,7 +43,15 @@ public class ChoicesActivity extends AppCompatActivity {
         conflict = findViewById(R.id.chipConflict);
         life = findViewById(R.id.chipLife);
         next = findViewById(R.id.nextButton);
+        main = findViewById(R.id.textViewMain);
         error = findViewById(R.id.textViewNoChoices);
+
+        if (bundle.getString("userType").equals("user")) {
+            main.setText("Select the issues that you struggle with");
+        }
+        if (bundle.getString("userType").equals("counsellor")) {
+            main.setText("Select the issues that you are comfortable dealing with");
+        }
 
         View.OnClickListener chipListener = new View.OnClickListener() {
             @Override
@@ -63,8 +74,19 @@ public class ChoicesActivity extends AppCompatActivity {
                 if (issues.size() == 0) {
                     error.setText("Must select at least one issue before proceeding");
                 }
+                else {
+                    error.setText("");
+                    String name = bundle.getString("name");
+                    String password = bundle.getString("password");
+                    issues.sort(String::compareToIgnoreCase);
+                    process(name, password, issues.toString());
+                }
             }
         });
+
+    }
+
+    private void process(String name, String password, String issues) {
 
     }
 

@@ -19,13 +19,12 @@
         tools:layout_editor_absoluteY="1dp">
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/textViewMain"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="40dp"
             android:layout_marginRight="20dp"
-            android:text="Select the issues you struggle with"
             android:textColor="@color/white"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -48,36 +47,42 @@
                 android:id="@+id/chipRelChallenges"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:text="Relationship challenges" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipTrauma"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:text="Trauma" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipSelfEsteem"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:text="Self-esteem" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipMotivation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:text="Decreased motivation" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipConflict"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:text="Conflict management" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipLife"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:text="Life balance" />
 
         </com.google.android.material.chip.ChipGroup>
