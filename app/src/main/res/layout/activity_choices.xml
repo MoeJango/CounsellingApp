@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".UserChoicesActivity">
+    tools:context=".ChoicesActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -92,7 +92,8 @@
             android:layout_marginTop="300dp"
             android:layout_gravity="center"
             app:backgroundTint="@color/white"
-            app:srcCompat="?attr/actionModeCloseDrawable" />
+            app:srcCompat="?attr/actionModeCloseDrawable"
+            app:fabCustomSize="60dp"/>
 
 
     </LinearLayout>
