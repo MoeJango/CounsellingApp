@@ -64,6 +64,7 @@ public class RegisterActivity extends AppCompatActivity {
     private void register(String name, String password, String passwordConfirm) {
         if ((0 < name.length()&&name.length() <= 25) && (0 < password.length()&&password.length() <= 25)) {
             if (password.equals(passwordConfirm)) {
+                error.setText("");
                 String userType = "";
                 if (userClicked) {
                     userType = "user";
@@ -104,7 +105,6 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
     }
-
 
 
     public void onRegisterClick(View view) {
