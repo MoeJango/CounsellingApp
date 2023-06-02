@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.service.controls.actions.FloatAction;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.google.android.material.chip.Chip;
@@ -70,21 +71,25 @@ public class ChoicesActivity extends AppCompatActivity {
             main.setText("Select the issues that you are comfortable dealing with");
         }
 
-        View.OnClickListener chipListener = new View.OnClickListener() {
+        CompoundButton.OnCheckedChangeListener chipListener = new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
-                Chip c = (Chip) v;
-                String issue = c.getText().toString();
-                issues.add(issue);
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                String issue = compoundButton.getText().toString();
+                if (b) {
+                    issues.add(issue);
+                }
+                else {
+                    issues.remove(issue);
+                }
             }
         };
 
-        relChallenges.setOnClickListener(chipListener);
-        trauma.setOnClickListener(chipListener);
-        selfEsteem.setOnClickListener(chipListener);
-        motivation.setOnClickListener(chipListener);
-        conflict.setOnClickListener(chipListener);
-        life.setOnClickListener(chipListener);
+        relChallenges.setOnCheckedChangeListener(chipListener);
+        trauma.setOnCheckedChangeListener(chipListener);
+        selfEsteem.setOnCheckedChangeListener(chipListener);
+        motivation.setOnCheckedChangeListener(chipListener);
+        conflict.setOnCheckedChangeListener(chipListener);
+        life.setOnCheckedChangeListener(chipListener);
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -96,7 +101,11 @@ public class ChoicesActivity extends AppCompatActivity {
                     String name = bundle.getString("name");
                     String password = bundle.getString("password");
                     issues.sort(String::compareToIgnoreCase);
-                    process(name, password, issues.toString(), tableName);
+                    try {
+                        process(name, password, issues.toString(), tableName);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         });
@@ -111,13 +120,13 @@ public class ChoicesActivity extends AppCompatActivity {
                 .add("tableName", tableName)
                 .build();
         Request request = new Request.Builder()
-                .url("https://lamp.ms.wits.ac.za/mc/test2.php")
+                .url("https://lamp.ms.wits.ac.za/home/s2542012/register.php")
                 .post(formBody)
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-        }
+        //try (Response response = client.newCall(request).execute()) {
+        //    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+        //}
 
     }
 
