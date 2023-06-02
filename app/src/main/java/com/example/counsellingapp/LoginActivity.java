@@ -60,8 +60,10 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        startActivity(intent);
         overridePendingTransition(android.R.anim.slide_in_left,
                 android.R.anim.slide_out_right);
+        finish();
     }
 }

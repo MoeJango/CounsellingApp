@@ -122,4 +122,5 @@ public class RegisterActivity extends AppCompatActivity {
                 android.R.anim.slide_out_right);
         finish();
     }
+
 }
