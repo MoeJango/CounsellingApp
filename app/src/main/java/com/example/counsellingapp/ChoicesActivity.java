@@ -1,7 +1,9 @@
 package com.example.counsellingapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ContentProviderOperation;
 import android.os.Bundle;
 import android.service.controls.actions.FloatAction;
 import android.view.View;
@@ -11,7 +13,18 @@ import android.widget.TextView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.Headers;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class ChoicesActivity extends AppCompatActivity {
 
@@ -25,6 +38,8 @@ public class ChoicesActivity extends AppCompatActivity {
     private TextView main;
     private TextView error;
     private ArrayList<String> issues = new ArrayList<>();
+    private String tableName;
+    OkHttpClient client = new OkHttpClient();
 
 
     @Override
@@ -47,9 +62,11 @@ public class ChoicesActivity extends AppCompatActivity {
         error = findViewById(R.id.textViewNoChoices);
 
         if (bundle.getString("userType").equals("user")) {
+            tableName = "users";
             main.setText("Select the issues that you struggle with");
         }
         if (bundle.getString("userType").equals("counsellor")) {
+            tableName = "counsellors";
             main.setText("Select the issues that you are comfortable dealing with");
         }
 
@@ -79,14 +96,28 @@ public class ChoicesActivity extends AppCompatActivity {
                     String name = bundle.getString("name");
                     String password = bundle.getString("password");
                     issues.sort(String::compareToIgnoreCase);
-                    process(name, password, issues.toString());
+                    process(name, password, issues.toString(), tableName);
                 }
             }
         });
 
     }
 
-    private void process(String name, String password, String issues) {
+    private void process(String name, String password, String issues, String tableName) throws IOException {
+        RequestBody formBody = new FormBody.Builder()
+                .add("name", name)
+                .add("password", password)
+                .add("issues", issues)
+                .add("tableName", tableName)
+                .build();
+        Request request = new Request.Builder()
+                .url("https://lamp.ms.wits.ac.za/mc/test2.php")
+                .post(formBody)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+        }
 
     }
 
