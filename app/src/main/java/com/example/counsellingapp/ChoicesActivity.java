@@ -106,10 +106,10 @@ public class ChoicesActivity extends AppCompatActivity {
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
+
                 }
             }
         });
-
     }
 
     private void process(String name, String password, String issues, String tableName) throws IOException {
@@ -124,9 +124,24 @@ public class ChoicesActivity extends AppCompatActivity {
                 .post(formBody)
                 .build();
 
-        //try (Response response = client.newCall(request).execute()) {
-        //    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-        //}
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) {
+                if (response.isSuccessful()) {
+                    System.out.println("Record inserted successfully");
+                } else {
+                    System.out.println("Error inserting record: " + response.message());
+                }
+
+                // Close the response
+                response.close();
+            }
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+        });
 
     }
 
