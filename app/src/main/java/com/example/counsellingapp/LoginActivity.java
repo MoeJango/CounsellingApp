@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import java.io.IOException;
 
@@ -24,6 +25,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText password;
     private Button loginButtonUser;
     private Button loginButtonCounsellor;
+    private TextView error;
     private boolean userClicked = false;
     private boolean counsellorClicked = false;
 
@@ -38,6 +40,7 @@ public class LoginActivity extends AppCompatActivity {
 
         name = findViewById(R.id.editTextName);
         password = findViewById(R.id.editTextPassword);
+        error = findViewById(R.id.textViewError);
         loginButtonUser = findViewById(R.id.cirLoginButtonUser);
         loginButtonCounsellor = findViewById(R.id.cirLoginButtonCounsellor);
 
@@ -68,12 +71,12 @@ public class LoginActivity extends AppCompatActivity {
 
 
     private void authenticateUser(String name, String password) {
-        String tableName = "";
+        String userType = "";
         if (userClicked) {
-            tableName = "users";
+            userType = "user";
         }
         if (counsellorClicked) {
-            tableName = "counsellor";
+            userType = "counsellor";
         }
 
         String baseURL = "https://lamp.ms.wits.ac.za/home/s2542012/register.php";
@@ -81,14 +84,15 @@ public class LoginActivity extends AppCompatActivity {
         HttpUrl.Builder urlBuilder = HttpUrl.parse(baseURL).newBuilder();
         urlBuilder.addQueryParameter("name", name);
         urlBuilder.addQueryParameter("password", password);
-        urlBuilder.addQueryParameter("tableName", tableName);
+        urlBuilder.addQueryParameter("tableName", userType+"s");
         String url = urlBuilder.build().toString();
 
         Request request = new Request.Builder()
-                .url("https://lamp.ms.wits.ac.za/home/s2542012/cars.php")
+                .url(url)
                 .build();
 
         OkHttpClient client = new OkHttpClient();
+        String finalUserType = userType;
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -107,10 +111,15 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         if (responseData.equals("No matching records found")) {
-
+                            error.setText("Account doesn't exist");
                         }
                         else if (responseData.equals("Record found")) {
                             Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                            Bundle bundle = new Bundle();
+                            bundle.putString("userType", finalUserType);
+                            bundle.putString("name", name);
+                            bundle.putString("password", password);
+                            intent.putExtras(bundle);
                             startActivity(intent);
                             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                             finish();
@@ -119,11 +128,6 @@ public class LoginActivity extends AppCompatActivity {
                 });
             }
         });
-
-        //Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-        //startActivity(intent);
-        //overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.slide_out_right);
-        //finish();
     }
 
 
