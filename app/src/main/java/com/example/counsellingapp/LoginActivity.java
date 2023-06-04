@@ -19,6 +19,7 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class LoginActivity extends AppCompatActivity {
     private EditText name;
@@ -101,34 +102,37 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
-                // ... check for failure using `isSuccessful` before proceeding
+                if (!response.isSuccessful()) {
+                    error.setText("An error has occurred. Please try again");
+                    throw new IOException("Unexpected code " + response);
+                }
 
                 // Read data on the worker thread
-                final String responseData = response.body().string();
+                else {
+                    final String responseData = response.body().string();
 
-                // Run view-related code back on the main thread
-                LoginActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (responseData.equals("No matching records found")) {
-                            error.setText("Account doesn't exist");
+                    // Run view-related code back on the main thread
+                    LoginActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (responseData.equals("No matching records found")) {
+                                error.setText("Account doesn't exist");
+                            } else if (responseData.equals("Record found")) {
+                                Intent intent = new Intent(LoginActivity.this, ChatsActivity.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putString("userType", finalUserType);
+                                bundle.putString("name", name);
+                                bundle.putString("password", password);
+                                intent.putExtras(bundle);
+                                startActivity(intent);
+                                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                                finish();
+                            } else {
+                                error.setText("An error has occurred. Please try again");
+                            }
                         }
-                        else if (responseData.equals("Record found")) {
-                            Intent intent = new Intent(LoginActivity.this, ChatsActivity.class);
-                            Bundle bundle = new Bundle();
-                            bundle.putString("userType", finalUserType);
-                            bundle.putString("name", name);
-                            bundle.putString("password", password);
-                            intent.putExtras(bundle);
-                            startActivity(intent);
-                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                            finish();
-                        }
-                        else {
-                            error.setText("An error has occurred. Please try again");
-                        }
-                    }
-                });
+                    });
+                }
             }
         });
     }
