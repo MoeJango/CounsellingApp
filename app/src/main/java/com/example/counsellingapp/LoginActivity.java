@@ -79,7 +79,7 @@ public class LoginActivity extends AppCompatActivity {
             userType = "counsellor";
         }
 
-        String baseURL = "https://lamp.ms.wits.ac.za/home/s2542012/register.php";
+        String baseURL = "https://lamp.ms.wits.ac.za/home/s2542012/login.php";
 
         HttpUrl.Builder urlBuilder = HttpUrl.parse(baseURL).newBuilder();
         urlBuilder.addQueryParameter("name", name);
@@ -114,7 +114,7 @@ public class LoginActivity extends AppCompatActivity {
                             error.setText("Account doesn't exist");
                         }
                         else if (responseData.equals("Record found")) {
-                            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                            Intent intent = new Intent(LoginActivity.this, ChatsActivity.class);
                             Bundle bundle = new Bundle();
                             bundle.putString("userType", finalUserType);
                             bundle.putString("name", name);
@@ -123,6 +123,9 @@ public class LoginActivity extends AppCompatActivity {
                             startActivity(intent);
                             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                             finish();
+                        }
+                        else {
+                            error.setText("An error has occurred. Please try again");
                         }
                     }
                 });

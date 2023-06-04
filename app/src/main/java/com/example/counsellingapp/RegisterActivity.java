@@ -1,5 +1,6 @@
 package com.example.counsellingapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -8,6 +9,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class RegisterActivity extends AppCompatActivity {
     private EditText name;
@@ -44,6 +54,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                 // Perform user registration
                 register(strName, strPassword, strPasswordConfirm);
+
             }
         });
 
@@ -57,9 +68,11 @@ public class RegisterActivity extends AppCompatActivity {
 
                 // Perform counsellor registration
                 register(strName, strPassword, strPasswordConfirm);
+
             }
         });
     }
+
 
     private void register(String name, String password, String passwordConfirm) {
         if ((0 < name.length()&&name.length() <= 25) && (0 < password.length()&&password.length() <= 25)) {
