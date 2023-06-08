@@ -88,7 +88,7 @@ public class RegisterActivity extends AppCompatActivity {
                 if (counsellorClicked) {
                     userType = "counsellor";
                 }
-                register(name, password, userType);
+                isPasswordUnique(name, password, userType);
             }
             else {
                 error.setText("Passwords do not match");
@@ -112,6 +112,69 @@ public class RegisterActivity extends AppCompatActivity {
             }
         }
 
+    }
+
+
+    private void isPasswordUnique(String name, String password, String userType) {  // password must be unique
+        RequestBody formBody = new FormBody.Builder()
+                .add("password", password)
+                .add("tableName", userType+"s")
+                .build();
+        Request request = new Request.Builder()
+                .url("https://lamp.ms.wits.ac.za/home/s2542012/password.php")
+                .post(formBody)
+                .build();
+
+        OkHttpClient client = new OkHttpClient();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    final String responseBody = response.body().string();
+                    System.out.println(responseBody);
+                    RegisterActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (responseBody.equals("error")) {
+                                error.setText("An error has occurred. Please try again");
+                                edtName.setText("");
+                                edtPassword.setText("");
+                                edtPasswordConfirm.setText("");
+                            }
+                            else if (responseBody.equals("false")){
+                                error.setText("Please use another password");
+                                edtName.setText("");
+                                edtPassword.setText("");
+                                edtPasswordConfirm.setText("");
+                            }
+                            else if (responseBody.equals("true")) {
+                                register(name, password, userType);
+                            }
+                        }
+                    });
+                }
+                else {
+                    RegisterActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            System.out.println("Error: " + response.message());
+                            error.setText("An error has occurred. Please try again");
+                            edtName.setText("");
+                            edtPassword.setText("");
+                            edtPasswordConfirm.setText("");
+                        }
+                    });
+                }
+
+                // Close the response
+                response.close();
+            }
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 
