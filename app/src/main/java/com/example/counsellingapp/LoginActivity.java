@@ -104,6 +104,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onResponse(Call call, final Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     error.setText("An error has occurred. Please try again");
+                    System.out.println("Error: mao " + response.message());
                     throw new IOException("Unexpected code " + response);
                 }
 
@@ -117,8 +118,6 @@ public class LoginActivity extends AppCompatActivity {
                         public void run() {
                             if (responseData.equals("No matching records found")) {
                                 error.setText("Account doesn't exist");
-                            } else if (responseData.equals("error")) {
-                                error.setText("An error has occurred. Please try again");
                             } else {
                                 System.out.println(responseData);
                                 Intent intent = new Intent(LoginActivity.this, ChatsActivity.class);
