@@ -15,9 +15,11 @@ import java.io.IOException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.FormBody;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
@@ -80,16 +82,14 @@ public class LoginActivity extends AppCompatActivity {
             userType = "counsellor";
         }
 
-        String baseURL = "https://lamp.ms.wits.ac.za/home/s2542012/login.php";
-
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(baseURL).newBuilder();
-        urlBuilder.addQueryParameter("name", name);
-        urlBuilder.addQueryParameter("password", password);
-        urlBuilder.addQueryParameter("tableName", userType+"s");
-        String url = urlBuilder.build().toString();
-
+        RequestBody formBody = new FormBody.Builder()
+                .add("name", name)
+                .add("password", password)
+                .add("tableName", userType+"s")
+                .build();
         Request request = new Request.Builder()
-                .url(url)
+                .url("https://lamp.ms.wits.ac.za/home/s2542012/login.php")
+                .post(formBody)
                 .build();
 
         OkHttpClient client = new OkHttpClient();

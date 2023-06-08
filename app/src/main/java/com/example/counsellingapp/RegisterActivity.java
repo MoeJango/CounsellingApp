@@ -11,18 +11,21 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.FormBody;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class RegisterActivity extends AppCompatActivity {
-    private EditText name;
-    private EditText password;
-    private EditText passwordConfirm;
+    private EditText edtName;
+    private EditText edtPassword;
+    private EditText edtPasswordConfirm;
     private Button registerButtonUser;
     private Button registerButtonCounsellor;
     private TextView error;
@@ -37,9 +40,9 @@ public class RegisterActivity extends AppCompatActivity {
             getSupportActionBar().hide();
         }
 
-        name = findViewById(R.id.editTextName);
-        password = findViewById(R.id.editTextPassword);
-        passwordConfirm = findViewById(R.id.editTextPasswordConfirm);
+        edtName = findViewById(R.id.editTextName);
+        edtPassword = findViewById(R.id.editTextPassword);
+        edtPasswordConfirm = findViewById(R.id.editTextPasswordConfirm);
         registerButtonUser = findViewById(R.id.cirRegisterButtonUser);
         registerButtonCounsellor = findViewById(R.id.cirRegisterButtonCounsellor);
         error = findViewById(R.id.textViewError);
@@ -48,12 +51,12 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 userClicked = true;
-                String strName = name.getText().toString();
-                String strPassword = password.getText().toString();
-                String strPasswordConfirm  = passwordConfirm.getText().toString();
+                String strName = edtName.getText().toString();
+                String strPassword = edtPassword.getText().toString();
+                String strPasswordConfirm  = edtPasswordConfirm.getText().toString();
 
                 // Perform user registration
-                register(strName, strPassword, strPasswordConfirm);
+                startRegister(strName, strPassword, strPasswordConfirm);
 
             }
         });
@@ -62,19 +65,19 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 counsellorClicked = true;
-                String strName = name.getText().toString();
-                String strPassword = password.getText().toString();
-                String strPasswordConfirm  = passwordConfirm.getText().toString();
+                String strName = edtName.getText().toString();
+                String strPassword = edtPassword.getText().toString();
+                String strPasswordConfirm  = edtPasswordConfirm.getText().toString();
 
                 // Perform counsellor registration
-                register(strName, strPassword, strPasswordConfirm);
+                startRegister(strName, strPassword, strPasswordConfirm);
 
             }
         });
     }
 
 
-    private void register(String name, String password, String passwordConfirm) {
+    private void startRegister(String name, String password, String passwordConfirm) {
         if ((0 < name.length()&&name.length() <= 25) && (0 < password.length()&&password.length() <= 25)) {
             if (password.equals(passwordConfirm)) {
                 error.setText("");
@@ -85,38 +88,157 @@ public class RegisterActivity extends AppCompatActivity {
                 if (counsellorClicked) {
                     userType = "counsellor";
                 }
-                Intent intent = new Intent(RegisterActivity.this, ChoicesActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("userType", userType);
-                bundle.putString("name", name);
-                bundle.putString("password", password);
-                intent.putExtras(bundle);
-                startActivity(intent);
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                finish();
+                register(name, password, userType);
             }
             else {
                 error.setText("Passwords do not match");
-                this.name.setText("");
-                this.password.setText("");
-                this.passwordConfirm.setText("");
+                edtName.setText("");
+                edtPassword.setText("");
+                edtPasswordConfirm.setText("");
             }
         }
         else {
             if (name.length() > 25 || password.length() > 25) {
                 error.setText("Name or password exceed the maximum length of 25 characters");
-                this.name.setText("");
-                this.password.setText("");
-                this.passwordConfirm.setText("");
+                edtName.setText("");
+                edtPassword.setText("");
+                edtPasswordConfirm.setText("");
             }
             if (name.length() == 0 || password.length() == 0) {
                 error.setText("Name or password cannot be empty");
-                this.name.setText("");
-                this.password.setText("");
-                this.passwordConfirm.setText("");
+                edtName.setText("");
+                edtPassword.setText("");
+                edtPasswordConfirm.setText("");
             }
         }
 
+    }
+
+
+    private void insert(String name, String password, String userType) {
+        RequestBody formBody = new FormBody.Builder()
+                .add("name", name)
+                .add("password", password)
+                .add("tableName", userType+"s")
+                .build();
+        Request request = new Request.Builder()
+                .url("https://lamp.ms.wits.ac.za/home/s2542012/register.php")
+                .post(formBody)
+                .build();
+
+        OkHttpClient client = new OkHttpClient();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    System.out.println(response.body().string());
+                } else {
+                    System.out.println("Error inserting record: " + response.message());
+                }
+
+                // Close the response
+                response.close();
+            }
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+
+    private void proceed(String name, String password, String userType) {
+        RequestBody formBody = new FormBody.Builder()
+                .add("name", name)
+                .add("password", password)
+                .add("tableName", userType+"s")
+                .build();
+        Request request = new Request.Builder()
+                .url("https://lamp.ms.wits.ac.za/home/s2542012/getID.php")
+                .post(formBody)
+                .build();
+
+        OkHttpClient client = new OkHttpClient();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) {
+                if (response.isSuccessful()) {
+                    final String responseBody = response.body().string();
+                    RegisterActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                        }
+                    });
+                } else {
+                    System.out.println("Error inserting record: " + response.message());
+                }
+
+                // Close the response
+                response.close();
+            }
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+
+    private void register(String name, String password, String userType) {
+        RequestBody formBody = new FormBody.Builder()
+                .add("password", password)
+                .add("tableName", userType+"s")
+                .build();
+        Request request = new Request.Builder()
+                .url("https://lamp.ms.wits.ac.za/home/s2542012/password.php")
+                .post(formBody)
+                .build();
+
+        OkHttpClient client = new OkHttpClient();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    final String responseBody = response.body().string();
+                    RegisterActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (responseBody.equals("true")) {
+                                insert(name, password, userType);
+                                Intent intent = new Intent(RegisterActivity.this, ChoicesActivity.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putString("userType", userType);
+                                bundle.putString("name", name);
+                                bundle.putString("password", password);
+                                intent.putExtras(bundle);
+                                startActivity(intent);
+                                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                                finish();
+                            }
+                            else {
+                                error.setText("Please try another password");
+                                edtName.setText("");
+                                edtPassword.setText("");
+                                edtPasswordConfirm.setText("");
+                            }
+                        }
+                    });
+                } else {
+                    System.out.println("Error inserting record: " + response.message());
+                }
+
+                // Close the response
+                response.close();
+            }
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 

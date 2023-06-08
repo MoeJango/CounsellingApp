@@ -10,27 +10,30 @@ import android.widget.LinearLayout;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Button loginButton;
+    private Button registerButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+        loginButton = findViewById(R.id.loginButton);
+        registerButton = findViewById(R.id.registerButton);
 
-        LinearLayout l = new LinearLayout(this);
-        setContentView(l);
-        Button b1 = new Button(this);
-        Button b2 = new Button(this);
-        l.addView(b1);
-        l.addView(b2);
-        b1.setOnClickListener(new View.OnClickListener() {
+        loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                 startActivity(intent);
-                overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.slide_out_right);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 finish();
             }
         });
 
-        b2.setOnClickListener(new View.OnClickListener() {
+        registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                     Intent intent = new Intent(MainActivity.this, RegisterActivity.class);

@@ -76,7 +76,7 @@ public class ChatsActivity extends AppCompatActivity {
 
                     if (responseBody.equals("null")) {
                         // No counselor assigned, start periodic matching
-                        startPeriodicUserMatching(name, password);
+                        //startPeriodicUserMatching(name, password);
                     } else {
                         // User already has a counselor, proceed as normal
                         String counselorId = responseBody;
