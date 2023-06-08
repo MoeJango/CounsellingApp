@@ -115,7 +115,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
 
-    private void insert(String name, String password, String userType) {
+    private void register(String name, String password, String userType) {
         RequestBody formBody = new FormBody.Builder()
                 .add("name", name)
                 .add("password", password)
@@ -131,103 +131,41 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    System.out.println(response.body().string());
-                } else {
-                    System.out.println("Error inserting record: " + response.message());
-                }
-
-                // Close the response
-                response.close();
-            }
-
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-
-    private void proceed(String name, String password, String userType) {
-        RequestBody formBody = new FormBody.Builder()
-                .add("name", name)
-                .add("password", password)
-                .add("tableName", userType+"s")
-                .build();
-        Request request = new Request.Builder()
-                .url("https://lamp.ms.wits.ac.za/home/s2542012/getID.php")
-                .post(formBody)
-                .build();
-
-        OkHttpClient client = new OkHttpClient();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onResponse(Call call, Response response) {
-                if (response.isSuccessful()) {
                     final String responseBody = response.body().string();
+                    System.out.println(responseBody);
                     RegisterActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-
-                        }
-                    });
-                } else {
-                    System.out.println("Error inserting record: " + response.message());
-                }
-
-                // Close the response
-                response.close();
-            }
-
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-
-    private void register(String name, String password, String userType) {
-        RequestBody formBody = new FormBody.Builder()
-                .add("password", password)
-                .add("tableName", userType+"s")
-                .build();
-        Request request = new Request.Builder()
-                .url("https://lamp.ms.wits.ac.za/home/s2542012/password.php")
-                .post(formBody)
-                .build();
-
-        OkHttpClient client = new OkHttpClient();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    final String responseBody = response.body().string();
-                    RegisterActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (responseBody.equals("true")) {
-                                insert(name, password, userType);
+                            if (responseBody.equals("error")) {
+                                error.setText("An error has occurred. Please try again");
+                                edtName.setText("");
+                                edtPassword.setText("");
+                                edtPasswordConfirm.setText("");
+                            }
+                            else {
                                 Intent intent = new Intent(RegisterActivity.this, ChoicesActivity.class);
                                 Bundle bundle = new Bundle();
                                 bundle.putString("userType", userType);
-                                bundle.putString("name", name);
-                                bundle.putString("password", password);
+                                bundle.putString("ID", responseBody);
                                 intent.putExtras(bundle);
                                 startActivity(intent);
                                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                                 finish();
                             }
-                            else {
-                                error.setText("Please try another password");
-                                edtName.setText("");
-                                edtPassword.setText("");
-                                edtPasswordConfirm.setText("");
-                            }
                         }
                     });
-                } else {
-                    System.out.println("Error inserting record: " + response.message());
+                }
+                else {
+                    RegisterActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            System.out.println("Error inserting record: " + response.message());
+                            error.setText("An error has occurred. Please try again");
+                            edtName.setText("");
+                            edtPassword.setText("");
+                            edtPasswordConfirm.setText("");
+                        }
+                    });
                 }
 
                 // Close the response

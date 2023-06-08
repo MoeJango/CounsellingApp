@@ -117,18 +117,18 @@ public class LoginActivity extends AppCompatActivity {
                         public void run() {
                             if (responseData.equals("No matching records found")) {
                                 error.setText("Account doesn't exist");
-                            } else if (responseData.equals("Record found")) {
+                            } else if (responseData.equals("error")) {
+                                error.setText("An error has occurred. Please try again");
+                            } else {
+                                System.out.println(responseData);
                                 Intent intent = new Intent(LoginActivity.this, ChatsActivity.class);
                                 Bundle bundle = new Bundle();
                                 bundle.putString("userType", finalUserType);
-                                bundle.putString("name", name);
-                                bundle.putString("password", password);
+                                bundle.putString("id", responseData);
                                 intent.putExtras(bundle);
                                 startActivity(intent);
                                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                                 finish();
-                            } else {
-                                error.setText("An error has occurred. Please try again");
                             }
                         }
                     });
