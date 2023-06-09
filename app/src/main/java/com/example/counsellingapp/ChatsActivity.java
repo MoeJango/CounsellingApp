@@ -34,10 +34,10 @@ public class ChatsActivity extends AppCompatActivity {
         userType = bundle.getString("userType");
         name = bundle.getString("name");
         password = bundle.getString("password");
-        scrollLinearLayout = findViewById(R.id.scrollLayout);
+
 
         if (userType.equals("user")) {
-            startUserMatching(name, password);
+            //startUserMatching(name, password);
         }
     }
 

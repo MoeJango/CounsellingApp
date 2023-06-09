@@ -148,15 +148,9 @@ public class ChoicesActivity extends AppCompatActivity {
                                 error.setText("An error has occurred. Please try again");
                             }
                             else {
-                                Intent intent = new Intent(ChoicesActivity.this, ChatsActivity.class);
-                                Bundle bundle = new Bundle();
-                                bundle.putString("userType", userType);
-                                bundle.putString("name", name);
-                                bundle.putString("ID", ID);
-                                intent.putExtras(bundle);
-                                startActivity(intent);
-                                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                                finish();
+                                if (userType.equals("user")) {
+                                    matchUser(name, ID, userType);
+                                }
                             }
                         }
                     });;
@@ -179,4 +173,53 @@ public class ChoicesActivity extends AppCompatActivity {
     }
 
 
+    private void matchUser(String name, String ID, String userType) {
+        RequestBody formBody = new FormBody.Builder()
+                .add("id", ID)
+                .build();
+        Request request = new Request.Builder()
+                .url("https://lamp.ms.wits.ac.za/home/s2542012/matchUser.php")
+                .post(formBody)
+                .build();
+
+        OkHttpClient client = new OkHttpClient();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    final String responseBody = response.body().string();
+                    System.out.println(responseBody);
+                    ChoicesActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (responseBody.equals("Success")) {
+                                Intent intent = new Intent(ChoicesActivity.this, ChatsActivity.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putString("userType", userType);
+                                bundle.putString("name", name);
+                                bundle.putString("ID", ID);
+                                intent.putExtras(bundle);
+                                startActivity(intent);
+                                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                                finish();
+                            }
+                        }
+                    });
+                } else {
+                    System.out.println("Error matching: " + response.message());
+                    error.setText("An error has occurred. Please try again");
+                    throw new IOException(String.valueOf(response));
+                }
+
+                // Close the response
+                response.close();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+
+            }
+        });
+
+    }
 }
