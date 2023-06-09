@@ -154,16 +154,11 @@ public class RegisterActivity extends AppCompatActivity {
                     });
                 }
                 else {
-                    RegisterActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            System.out.println("Error: " + response.message());
-                            error.setText("An error has occurred. Please try again");
-                            edtName.setText("");
-                            edtPassword.setText("");
-                            edtPasswordConfirm.setText("");
-                        }
-                    });
+                    System.out.println("Error: " + response.message());
+                    error.setText("An error has occurred. Please try again");
+                    edtName.setText("");
+                    edtPassword.setText("");
+                    edtPasswordConfirm.setText("");
                 }
 
                 // Close the response
@@ -209,6 +204,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 Intent intent = new Intent(RegisterActivity.this, ChoicesActivity.class);
                                 Bundle bundle = new Bundle();
                                 bundle.putString("userType", userType);
+                                bundle.putString("name", name);
                                 bundle.putString("ID", responseBody);
                                 intent.putExtras(bundle);
                                 startActivity(intent);

@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.ContentProviderOperation;
+import android.content.Intent;
 import android.os.Bundle;
 import android.service.controls.actions.FloatAction;
 import android.view.View;
@@ -63,11 +64,11 @@ public class ChoicesActivity extends AppCompatActivity {
         error = findViewById(R.id.textViewNoChoices);
 
         if (bundle.getString("userType").equals("user")) {
-            tableName = "users";
+            tableName = "user_issues";
             main.setText("Select the issues that you struggle with");
         }
         if (bundle.getString("userType").equals("counsellor")) {
-            tableName = "counsellors";
+            tableName = "counsellor_issues";
             main.setText("Select the issues that you are comfortable dealing with");
         }
 
@@ -75,6 +76,12 @@ public class ChoicesActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 String issue = compoundButton.getText().toString();
+                if (issue.equals("Self-esteem")) {
+                    issue = issue.replace("-", "_");
+                }
+                else {
+                    issue = issue.replace(" ", "_");
+                }
                 if (b) {
                     issues.add(issue);
                 }
@@ -99,12 +106,22 @@ public class ChoicesActivity extends AppCompatActivity {
                 else {
                     error.setText("");
                     String name = bundle.getString("name");
-                    String password = bundle.getString("password");
-                    issues.sort(String::compareToIgnoreCase);
+                    String ID = bundle.getString("ID");
+                    String userType = bundle.getString("userType");
                     try {
-                        process(name, password, issues.toString(), tableName);
+                        FormBody.Builder builder = new FormBody.Builder();
+                        builder.add("id", ID);
+                        builder.add("tableName", tableName);
+                        for (int i=0; i<issues.size(); i++) {
+                            builder.add("column"+i, issues.get(i));
+                        }
+                        RequestBody formBody = builder.build();
+                        process(name, ID, userType, formBody);
+
                     } catch (IOException e) {
+                        error.setText("An error has occurred. Please try again");
                         throw new RuntimeException(e);
+
                     }
 
                 }
@@ -112,25 +129,41 @@ public class ChoicesActivity extends AppCompatActivity {
         });
     }
 
-    private void process(String name, String password, String issues, String tableName) throws IOException {
-        RequestBody formBody = new FormBody.Builder()
-                .add("name", name)
-                .add("password", password)
-                .add("issues", issues)
-                .add("tableName", tableName)
-                .build();
+    private void process(String name, String ID, String userType, RequestBody formBody) throws IOException {
         Request request = new Request.Builder()
-                .url("https://lamp.ms.wits.ac.za/home/s2542012/register.php")
+                .url("https://lamp.ms.wits.ac.za/home/s2542012/issues.php")
                 .post(formBody)
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onResponse(Call call, Response response) {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    System.out.println("Record inserted successfully");
+                    final String responseBody = response.body().string();
+                    System.out.println(responseBody);
+                    ChoicesActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (responseBody.equals("error")) {
+                                error.setText("An error has occurred. Please try again");
+                            }
+                            else {
+                                Intent intent = new Intent(ChoicesActivity.this, ChatsActivity.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putString("userType", userType);
+                                bundle.putString("name", name);
+                                bundle.putString("ID", ID);
+                                intent.putExtras(bundle);
+                                startActivity(intent);
+                                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                                finish();
+                            }
+                        }
+                    });;
                 } else {
                     System.out.println("Error inserting record: " + response.message());
+                    error.setText("An error has occurred. Please try again");
+                    throw new IOException(String.valueOf(response));
                 }
 
                 // Close the response
