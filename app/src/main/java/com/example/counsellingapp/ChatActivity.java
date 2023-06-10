@@ -8,6 +8,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 public class ChatActivity extends AppCompatActivity {
 
     String myID;
@@ -15,9 +17,12 @@ public class ChatActivity extends AppCompatActivity {
     String receiverName;
     String myUserType;
     RecyclerView chatRecyclerView;
+    ArrayList<Message> messages = new ArrayList<>();
+    MessageAdapter messageAdapter;
     EditText sendText;
     ImageView sendButton;
     TextView textViewName;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,19 +33,23 @@ public class ChatActivity extends AppCompatActivity {
         receiverID = getIntent().getStringExtra("receiverID");
         receiverName = getIntent().getStringExtra("name");
         myUserType = getIntent().getStringExtra("callerType");
+
         chatRecyclerView = findViewById(R.id.chatRecyclerView);
         sendText = findViewById(R.id.sendText);
         sendButton = findViewById(R.id.sendButton);
         textViewName = findViewById(R.id.textViewName);
 
+
         if (myUserType.equals("user")) {
             textViewName.setText("Counsellor " + receiverName);
         }
         else {
-            int i = getIntent().getIntExtra("patientNumber", 1);
-            textViewName.setText("Patient " + i);
+            String patientNumber = getIntent().getStringExtra("patientNumber");
+            textViewName.setText("Patient " + patientNumber);
         }
 
+        messageAdapter = new MessageAdapter(this, messages, myID);
+        chatRecyclerView.setAdapter(messageAdapter);
 
     }
 }

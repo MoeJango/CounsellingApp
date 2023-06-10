@@ -16,6 +16,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -35,6 +38,8 @@ public class ChatsListActivity extends AppCompatActivity {
     private ArrayList<User> users = new ArrayList<>();
     private UserAdapter adapter;
     private static CountDownLatch latch = new CountDownLatch(1);
+    private static final int INITIAL_DELAY = 0;
+    private static final int INTERVAL = 15;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +68,13 @@ public class ChatsListActivity extends AppCompatActivity {
         adapter = new UserAdapter(this, users, userType, id);
         userRecyclerView.setAdapter(adapter);
 
+        // refresh chat windows every 15 seconds
+        if (!isMatched) {
+            users.clear();
+            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+            executor.scheduleAtFixedRate(this::setUpUsers, INITIAL_DELAY, INTERVAL, TimeUnit.SECONDS);
+            adapter.notifyDataSetChanged();
+        }
     }
 
 
@@ -87,6 +99,7 @@ public class ChatsListActivity extends AppCompatActivity {
                         String responseBody = response.body().string();
                         System.out.println(responseBody);
                         if (!responseBody.equals("No counsellor")) {
+                            isMatched = true;
                              try {
                                  JSONObject jsonObject = new JSONObject(responseBody);
                                  String id = String.valueOf(jsonObject.getInt("counsellor_id"));
@@ -132,6 +145,7 @@ public class ChatsListActivity extends AppCompatActivity {
                         String responseBody = response.body().string();
                         System.out.println(responseBody);
                         if (!responseBody.equals("No users")) {
+                            isMatched = true;
                             ArrayList<String> idList = new ArrayList<>();
                             ArrayList<String> nameList = new ArrayList<>();
                             try {
