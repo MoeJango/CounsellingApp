@@ -69,8 +69,8 @@ public class ChatActivity extends AppCompatActivity {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if ((!sendText.toString().isEmpty()) && (sendText.toString().length() < 255)) {
-                    insert(myID, receiverID, sendText.toString());
+                if ((!sendText.getText().toString().isEmpty()) && (sendText.getText().toString().length() < 255)) {
+                    insert(myID, receiverID, sendText.getText().toString());
                     messages.clear();
                     updateView();
                     messageAdapter.notifyDataSetChanged();
@@ -147,7 +147,7 @@ public class ChatActivity extends AppCompatActivity {
                 .add("received_id", receivedKey)
                 .build();
         Request request = new Request.Builder()
-                .url("https://lamp.ms.wits.ac.za/home/s2542012/checkMessage.php")
+                .url("https://lamp.ms.wits.ac.za/home/s2542012/checkMessages.php")
                 .post(formBody)
                 .build();
 
