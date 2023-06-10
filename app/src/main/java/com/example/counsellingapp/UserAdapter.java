@@ -47,6 +47,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.MyViewHolder> 
                     intent.putExtra("senderID", currentUserID);
                     intent.putExtra("receiverID", users.get(position).getId());
                     intent.putExtra("name", users.get(position).getName());
+                    intent.putExtra("callerType", callerType);
                     context.startActivity(intent);
 
                 }

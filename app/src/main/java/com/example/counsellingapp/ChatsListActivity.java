@@ -60,7 +60,6 @@ public class ChatsListActivity extends AppCompatActivity {
             throw new RuntimeException(e);
         }
 
-        System.out.println(users.size());
         adapter = new UserAdapter(this, users, userType, id);
         userRecyclerView.setAdapter(adapter);
 
