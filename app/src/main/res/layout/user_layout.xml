@@ -9,9 +9,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="8dp"
         android:text="User"
-        android:textSize="30sp"
+        android:textSize="24sp"
         android:textStyle="bold">
 
     </TextView>
@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_below="@+id/nameText"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="8dp"
         android:background="@color/black">
 
     </View>
