@@ -186,7 +186,7 @@ public class ChatActivity extends AppCompatActivity {
                         }
                     }
                 }
-
+                latch.countDown();
                 response.close();
             }
 

@@ -14,6 +14,10 @@
         android:background="@drawable/message_background"
         android:text="Sent a message "
         android:textAlignment="center"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
         android:textColor="@color/white"
         android:textSize="18sp" />
 
