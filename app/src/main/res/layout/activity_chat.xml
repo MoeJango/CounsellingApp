@@ -48,13 +48,14 @@
             android:background="@drawable/message_box"
             android:hint="Type a message"
             android:padding="10dp" />
-        
+
         <ImageView
             android:id="@+id/sendButton"
             android:layout_width="30dp"
             android:layout_height="70dp"
             android:layout_weight="20"
-            android:background="@drawable/send_button"/>
+            android:background="@drawable/send_button"
+            android:rotation="-180" />
 
     </LinearLayout>
 

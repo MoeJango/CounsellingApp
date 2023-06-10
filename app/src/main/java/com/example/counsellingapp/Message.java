@@ -9,7 +9,7 @@ public class Message {
 
     public Message(String message, String senderID) {
         this.message = message;
-        this. senderID = senderID;
+        this.senderID = senderID;
     }
 
     public String getMessage() {

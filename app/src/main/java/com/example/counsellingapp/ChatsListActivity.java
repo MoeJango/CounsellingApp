@@ -38,7 +38,7 @@ public class ChatsListActivity extends AppCompatActivity {
     private ArrayList<User> users = new ArrayList<>();
     private UserAdapter adapter;
     private static CountDownLatch latch = new CountDownLatch(1);
-    private static final int INITIAL_DELAY = 0;
+    private static final int INITIAL_DELAY = 1;
     private static final int INTERVAL = 15;
 
     @Override
@@ -68,16 +68,20 @@ public class ChatsListActivity extends AppCompatActivity {
         adapter = new UserAdapter(this, users, userType, id);
         userRecyclerView.setAdapter(adapter);
 
-        // refresh chat windows every 15 seconds
-        if (!isMatched) {
-            users.clear();
-            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-            executor.scheduleAtFixedRate(this::setUpUsers, INITIAL_DELAY, INTERVAL, TimeUnit.SECONDS);
-            adapter.notifyDataSetChanged();
-        }
+
+
     }
 
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // refresh chat windows every 15 seconds
+        if (!isMatched) {
+            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+            executor.scheduleAtFixedRate(this::scheduledUpdater, INITIAL_DELAY, INTERVAL, TimeUnit.SECONDS);
+        }
+    }
 
     public void setUpUsers() {
         if (userType.equals("user")) {
@@ -114,6 +118,7 @@ public class ChatsListActivity extends AppCompatActivity {
                             insertUser(null, "0", "empty");
                         }
                         latch.countDown();
+                        response.close();
                     }
                     else {
                         System.out.println(response.message());
@@ -173,6 +178,7 @@ public class ChatsListActivity extends AppCompatActivity {
                             insertUser(null, "0", "empty");
                         }
                         latch.countDown();
+                        response.close();
                     }
                     else {
                         System.out.println(response.message());
@@ -200,5 +206,13 @@ public class ChatsListActivity extends AppCompatActivity {
         overridePendingTransition(android.R.anim.slide_in_left,
                 android.R.anim.slide_out_right);
         finish();
+    }
+
+    public void scheduledUpdater() {
+        if (!isMatched) {
+            users.clear();
+            setUpUsers();
+            adapter.notifyDataSetChanged();
+        }
     }
 }
