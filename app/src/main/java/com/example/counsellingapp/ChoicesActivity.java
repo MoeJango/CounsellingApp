@@ -3,12 +3,9 @@ package com.example.counsellingapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.ContentProviderOperation;
 import android.content.Intent;
 import android.os.Bundle;
-import android.service.controls.actions.FloatAction;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
@@ -21,12 +18,10 @@ import java.util.ArrayList;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
-import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 public class ChoicesActivity extends AppCompatActivity {
 
@@ -196,7 +191,7 @@ public class ChoicesActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             System.out.println(responseBody);
-                            Intent intent = new Intent(ChoicesActivity.this, ChatsActivity.class);
+                            Intent intent = new Intent(ChoicesActivity.this, ChatsListActivity.class);
                             Bundle bundle = new Bundle();
                             bundle.putString("userType", userType);
                             bundle.putString("name", name);
@@ -246,7 +241,7 @@ public class ChoicesActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             System.out.println(responseBody);
-                            Intent intent = new Intent(ChoicesActivity.this, ChatsActivity.class);
+                            Intent intent = new Intent(ChoicesActivity.this, ChatsListActivity.class);
                             Bundle bundle = new Bundle();
                             bundle.putString("userType", userType);
                             bundle.putString("name", name);

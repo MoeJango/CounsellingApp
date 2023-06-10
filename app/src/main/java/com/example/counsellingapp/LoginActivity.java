@@ -3,7 +3,6 @@ package com.example.counsellingapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.ContentProviderOperation;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -16,12 +15,10 @@ import java.io.IOException;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
-import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 public class LoginActivity extends AppCompatActivity {
     private EditText name;
@@ -120,10 +117,11 @@ public class LoginActivity extends AppCompatActivity {
                                 error.setText("Account doesn't exist");
                             } else {
                                 System.out.println(responseData);
-                                Intent intent = new Intent(LoginActivity.this, ChatsActivity.class);
+                                Intent intent = new Intent(LoginActivity.this, ChatsListActivity.class);
                                 Bundle bundle = new Bundle();
                                 bundle.putString("userType", finalUserType);
-                                bundle.putString("id", responseData);
+                                bundle.putString("name", name);
+                                bundle.putString("ID", responseData);
                                 intent.putExtras(bundle);
                                 startActivity(intent);
                                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
