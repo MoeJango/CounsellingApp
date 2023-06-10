@@ -37,8 +37,10 @@ public class ChatActivity extends AppCompatActivity {
             textViewName.setText("Counsellor " + receiverName);
         }
         else {
-            textViewName.setText("Patient ");
+            int i = getIntent().getIntExtra("patientNumber", 1);
+            textViewName.setText("Patient " + i);
         }
+
 
     }
 }
