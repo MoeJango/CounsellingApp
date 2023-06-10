@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 
@@ -177,5 +178,14 @@ public class ChatsListActivity extends AppCompatActivity {
     public void insertUser(String name, String id, String userType) {
         User user = new User(name, id, userType);
         users.add(user);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(ChatsListActivity.this, MainActivity.class);
+        startActivity(intent);
+        overridePendingTransition(android.R.anim.slide_in_left,
+                android.R.anim.slide_out_right);
+        finish();
     }
 }
