@@ -1,6 +1,8 @@
 package com.example.counsellingapp;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,17 +17,21 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.MyViewHolder> 
 
     Context context;
     ArrayList<User> users;
+    String callerType;
+    String currentUserID;
 
-    public UserAdapter(Context context, ArrayList<User> users) {
+    public UserAdapter(Context context, ArrayList<User> users, String callerType, String currentUserID) {
         this.context = context;
         this.users = users;
+        this.callerType = callerType;
+        this.currentUserID = currentUserID;
     }
 
     @NonNull
     @Override
     public UserAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
-        View view = layoutInflater.inflate(R.layout.activity_chats_list, parent, false);
+        View view = layoutInflater.inflate(R.layout.user_layout, parent, false);
         return new UserAdapter.MyViewHolder(view);
     }
 
@@ -34,10 +40,41 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.MyViewHolder> 
         String userType = users.get(position).getUserType();
         if (userType.equals("counsellor")) {
             holder.name.setText("Counsellor " + users.get(position).getName());
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context, ChatActivity.class);
+                    intent.putExtra("senderID", currentUserID);
+                    intent.putExtra("receiverID", users.get(position).getId());
+                    intent.putExtra("name", users.get(position).getName());
+                    context.startActivity(intent);
+
+                }
+            });
         }
         else if (userType.equals("user")) {
-            holder.name.setText("User " + position);
+            holder.name.setText("Patient " + (position + 1));
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context, ChatActivity.class);
+                    intent.putExtra("senderID", currentUserID);
+                    intent.putExtra("receiverID", users.get(position).getId());
+                    intent.putExtra("name", users.get(position).getName());
+                    context.startActivity(intent);
+
+                }
+            });
         }
+        else {
+            if (callerType.equals("user")) {
+                holder.name.setText("Please wait while we assign you a counsellor");
+            } else if (callerType.equals("counsellor")) {
+                holder.name.setText("Please wait while we assign you users");
+
+            }
+        }
+
     }
 
     @Override
