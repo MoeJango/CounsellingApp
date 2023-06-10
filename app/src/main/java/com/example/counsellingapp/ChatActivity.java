@@ -1,9 +1,11 @@
 package com.example.counsellingapp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -35,9 +37,19 @@ public class ChatActivity extends AppCompatActivity {
         myUserType = getIntent().getStringExtra("callerType");
 
         chatRecyclerView = findViewById(R.id.chatRecyclerView);
+        chatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         sendText = findViewById(R.id.sendText);
         sendButton = findViewById(R.id.sendButton);
         textViewName = findViewById(R.id.textViewName);
+
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!sendText.toString().isEmpty()) {
+
+                }
+            }
+        });
 
 
         if (myUserType.equals("user")) {
