@@ -42,7 +42,7 @@ public class ChatActivity extends AppCompatActivity {
     EditText sendText;
     ImageView sendButton;
     TextView textViewName;
-    private static CountDownLatch latch = new CountDownLatch(1);
+    private CountDownLatch latch = new CountDownLatch(1);
     private static final int INITIAL_DELAY = 1;
     private static final int INTERVAL = 10;
 
@@ -88,7 +88,7 @@ public class ChatActivity extends AppCompatActivity {
             textViewName.setText("Patient " + patientNumber);
         }
 
-        updateView();
+        initialUpdateView();
         try {
             latch.await();
         } catch (InterruptedException e) {
@@ -139,7 +139,7 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    public void updateView() {
+    public void initialUpdateView() {
         String sentKey = myID+"@"+receiverID;
         String receivedKey = receiverID+"@"+myID;
         RequestBody formBody = new FormBody.Builder()
@@ -197,6 +197,66 @@ public class ChatActivity extends AppCompatActivity {
         });
         latch.countDown();
     }
+
+
+    public void updateView() {
+        String sentKey = myID+"@"+receiverID;
+        String receivedKey = receiverID+"@"+myID;
+        RequestBody formBody = new FormBody.Builder()
+                .add("sent_id", sentKey)
+                .add("received_id", receivedKey)
+                .build();
+        Request request = new Request.Builder()
+                .url("https://lamp.ms.wits.ac.za/home/s2542012/checkMessages.php")
+                .post(formBody)
+                .build();
+
+        OkHttpClient client = new OkHttpClient();
+        client.newCall(request).enqueue(new Callback() {
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    System.out.println(response.message());
+                    throw new IOException();
+                }
+                else {
+                    String responseBody = response.body().string();
+                    if (!responseBody.equals("No messages")) {
+                        ArrayList<String> messagesResponse = new ArrayList<>();
+                        ArrayList<String> ids = new ArrayList<>();
+                        try {
+                            JSONArray jsonArray = new JSONArray(responseBody);
+
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                                String id = jsonObject.getString("id");
+                                String message = jsonObject.getString("message");
+
+                                ids.add(id);
+                                messagesResponse.add(message);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        for (int i=0; i<messagesResponse.size(); i++) {
+                            int index = ids.get(i).indexOf('@');
+                            String senderID = ids.get(i).substring(0, index);
+                            insertMessage(messagesResponse.get(i), senderID);
+                        }
+                    }
+                }
+
+                response.close();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+
+            }
+        });
+    }
+
 
     public void insertMessage(String message, String senderID) {
         Message messageNew = new Message(message, senderID);
