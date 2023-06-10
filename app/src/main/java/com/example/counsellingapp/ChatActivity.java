@@ -72,9 +72,16 @@ public class ChatActivity extends AppCompatActivity {
                 if ((!sendText.getText().toString().isEmpty()) && (sendText.getText().toString().length() < 255)) {
                     insert(myID, receiverID, sendText.getText().toString());
                     messages.clear();
-                    updateView();
-                    messageAdapter.notifyDataSetChanged();
+                    initialUpdateView();
                     sendText.setText("");
+                    try {
+                        latch.await();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    messageAdapter.notifyDataSetChanged();
+                    System.out.println("Notify success");
+
                 }
             }
         });
@@ -127,7 +134,12 @@ public class ChatActivity extends AppCompatActivity {
                     throw new IOException();
                 }
                 else {
-                    System.out.println();
+                    ChatActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            System.out.println();
+                        }
+                    });
                 }
                 response.close();
             }
@@ -183,6 +195,7 @@ public class ChatActivity extends AppCompatActivity {
                             int index = ids.get(i).indexOf('@');
                             String senderID = ids.get(i).substring(0, index);
                             insertMessage(messagesResponse.get(i), senderID);
+                            System.out.println("Insert success");
                         }
                     }
                 }
@@ -195,7 +208,7 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         });
-        latch.countDown();
+
     }
 
 
@@ -232,7 +245,6 @@ public class ChatActivity extends AppCompatActivity {
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                                 String id = jsonObject.getString("id");
                                 String message = jsonObject.getString("message");
-
                                 ids.add(id);
                                 messagesResponse.add(message);
                             }
