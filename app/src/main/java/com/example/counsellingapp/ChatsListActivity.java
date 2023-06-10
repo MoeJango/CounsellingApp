@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -58,6 +59,7 @@ public class ChatsListActivity extends AppCompatActivity {
             throw new RuntimeException(e);
         }
 
+        System.out.println(users.size());
         adapter = new UserAdapter(this, users, userType, id);
         userRecyclerView.setAdapter(adapter);
 
@@ -89,8 +91,6 @@ public class ChatsListActivity extends AppCompatActivity {
                                  JSONObject jsonObject = new JSONObject(responseBody);
                                  String id = String.valueOf(jsonObject.getInt("counsellor_id"));
                                  String name = jsonObject.getString("counsellor_name");
-                                 System.out.println(id);
-                                 System.out.println(name);
                                  String userType = "counsellor";
                                  insertUser(name, id, userType);
                              } catch (JSONException e) {
@@ -100,6 +100,7 @@ public class ChatsListActivity extends AppCompatActivity {
                         else {
                             insertUser(null, "0", "empty");
                         }
+                        latch.countDown();
                     }
                     else {
                         System.out.println(response.message());
@@ -129,23 +130,39 @@ public class ChatsListActivity extends AppCompatActivity {
                     if (response.isSuccessful()) {
                         assert response.body() != null;
                         String responseBody = response.body().string();
+                        System.out.println(responseBody);
                         if (!responseBody.equals("No users")) {
+                            ArrayList<String> idList = new ArrayList<>();
+                            ArrayList<String> nameList = new ArrayList<>();
                             try {
-                                JSONObject jsonObject = new JSONObject(responseBody);
-                                String id = String.valueOf(jsonObject.getInt("counsellor_id"));
-                                System.out.println(id);
-                                String name = jsonObject.getString("counsellor_name");
-                                System.out.println(name);
-                                String userType = "counsellor";
-                                insertUser(name, id, userType);
+                                JSONArray jsonArray = new JSONArray(responseBody);
+
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                                    String id = jsonObject.getString("id");
+                                    String name = jsonObject.getString("name");
+
+                                    idList.add(id);
+                                    nameList.add(name);
+                                }
+
                             } catch (JSONException e) {
-                                throw new RuntimeException(e);
+                                e.printStackTrace();
+                            }
+                            for (int i=0; i<idList.size(); i++) {
+                                insertUser(nameList.get(i), idList.get(i), "user");
                             }
 
                         }
                         else {
                             insertUser(null, "0", "empty");
                         }
+                        latch.countDown();
+                    }
+                    else {
+                        System.out.println(response.message());
+                        throw new IOException();
                     }
                 }
 
@@ -160,6 +177,5 @@ public class ChatsListActivity extends AppCompatActivity {
     public void insertUser(String name, String id, String userType) {
         User user = new User(name, id, userType);
         users.add(user);
-        latch.countDown();
     }
 }
