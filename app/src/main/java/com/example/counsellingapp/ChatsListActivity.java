@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.LinearLayout;
 
 import org.json.JSONArray;
@@ -38,7 +39,7 @@ public class ChatsListActivity extends AppCompatActivity {
     private ArrayList<User> users = new ArrayList<>();
     private UserAdapter adapter;
     private static CountDownLatch latch = new CountDownLatch(1);
-    private static final int INITIAL_DELAY = 1;
+    private static final int INITIAL_DELAY = 15;
     private static final int INTERVAL = 15;
 
     @Override
@@ -60,7 +61,6 @@ public class ChatsListActivity extends AppCompatActivity {
 
         try {
             latch.await();
-
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -68,20 +68,20 @@ public class ChatsListActivity extends AppCompatActivity {
         adapter = new UserAdapter(this, users, userType, id);
         userRecyclerView.setAdapter(adapter);
 
-
-
-    }
-
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        // refresh chat windows every 15 seconds
+        /*
         if (!isMatched) {
+            // refresh chat list activity
             ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-            executor.scheduleAtFixedRate(this::scheduledUpdater, INITIAL_DELAY, INTERVAL, TimeUnit.SECONDS);
+            Handler handler = new Handler();
+            CountDownLatch latchNew = new CountDownLatch(1);
+            // refresh messages every 5 seconds
+            ChatsListActivity.ScheduledUpdater scheduledUpdater = new ChatsListActivity.ScheduledUpdater(adapter, handler, latchNew);
+            executor.scheduleAtFixedRate(scheduledUpdater, INITIAL_DELAY, INTERVAL, TimeUnit.SECONDS);
+
         }
+         */
     }
+
 
     public void setUpUsers() {
         if (userType.equals("user")) {
@@ -116,9 +116,11 @@ public class ChatsListActivity extends AppCompatActivity {
                         }
                         else {
                             insertUser(null, "0", "empty");
+
                         }
                         latch.countDown();
                         response.close();
+
                     }
                     else {
                         System.out.println(response.message());
@@ -172,12 +174,14 @@ public class ChatsListActivity extends AppCompatActivity {
                             for (int i=0; i<idList.size(); i++) {
                                 insertUser(nameList.get(i), idList.get(i), "user");
                             }
+                            latch.countDown();
 
                         }
                         else {
                             insertUser(null, "0", "empty");
+                            latch.countDown();
                         }
-                        latch.countDown();
+
                         response.close();
                     }
                     else {
@@ -194,6 +198,119 @@ public class ChatsListActivity extends AppCompatActivity {
         }
     }
 
+
+    public void scheduledSetUpUsers() {
+        users.clear();
+        if (userType.equals("user")) {
+            RequestBody formBody = new FormBody.Builder()
+                    .add("id", id)
+                    .build();
+            Request request = new Request.Builder()
+                    .url("https://lamp.ms.wits.ac.za/home/s2542012/checkForCounsellor.php")
+                    .post(formBody)
+                    .build();
+
+            OkHttpClient client = new OkHttpClient();
+            client.newCall(request).enqueue(new Callback() {
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (response.isSuccessful()) {
+                        assert response.body() != null;
+                        String responseBody = response.body().string();
+                        System.out.println(responseBody);
+                        if (!responseBody.equals("No counsellor")) {
+                            isMatched = true;
+                            try {
+                                JSONObject jsonObject = new JSONObject(responseBody);
+                                String id = String.valueOf(jsonObject.getInt("counsellor_id"));
+                                String name = jsonObject.getString("counsellor_name");
+                                String userType = "counsellor";
+                                insertUser(name, id, userType);
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        else {
+                            insertUser(null, "0", "empty");
+                        }
+                        response.close();
+
+                    }
+                    else {
+                        System.out.println(response.message());
+                        throw new IOException();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+
+                }
+            });
+        } else if (userType.equals("counsellor")) {
+            RequestBody formBody = new FormBody.Builder()
+                    .add("id", id)
+                    .build();
+            Request request = new Request.Builder()
+                    .url("https://lamp.ms.wits.ac.za/home/s2542012/checkForUsers.php")
+                    .post(formBody)
+                    .build();
+
+            OkHttpClient client = new OkHttpClient();
+            client.newCall(request).enqueue(new Callback() {
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (response.isSuccessful()) {
+                        assert response.body() != null;
+                        String responseBody = response.body().string();
+                        System.out.println(responseBody);
+                        if (!responseBody.equals("No users")) {
+                            isMatched = true;
+                            ArrayList<String> idList = new ArrayList<>();
+                            ArrayList<String> nameList = new ArrayList<>();
+                            try {
+                                JSONArray jsonArray = new JSONArray(responseBody);
+
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                                    String id = jsonObject.getString("id");
+                                    String name = jsonObject.getString("name");
+
+                                    idList.add(id);
+                                    nameList.add(name);
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            for (int i=0; i<idList.size(); i++) {
+                                insertUser(nameList.get(i), idList.get(i), "user");
+                            }
+
+                        }
+                        else {
+                            insertUser(null, "0", "empty");
+                        }
+                        response.close();
+                    }
+                    else {
+                        System.out.println(response.message());
+                        throw new IOException();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+
+                }
+            });
+        }
+    }
+
+
     public void insertUser(String name, String id, String userType) {
         User user = new User(name, id, userType);
         users.add(user);
@@ -208,11 +325,40 @@ public class ChatsListActivity extends AppCompatActivity {
         finish();
     }
 
-    public void scheduledUpdater() {
-        if (!isMatched) {
-            users.clear();
-            setUpUsers();
-            adapter.notifyDataSetChanged();
+    public class ScheduledUpdater implements Runnable{
+
+        private UserAdapter userAdapter;
+        private Handler handler;
+        private CountDownLatch latch;
+
+        public ScheduledUpdater(UserAdapter userAdapter, Handler handler, CountDownLatch latch) {
+            this.userAdapter = userAdapter;
+            this.handler = handler;
+            this.latch = latch;
+        }
+
+        @Override
+        public void run() {
+            // Perform your task here
+            scheduledSetUpUsers();
+            latch.countDown();
+            System.out.println("scheduledSetUp Successful");
+
+            // Wait for updateView() to complete before notifying data set changed
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    userAdapter.notifyDataSetChanged();
+                    System.out.println("scheduledNotifySet successful");
+                }
+            });
+
         }
     }
 }

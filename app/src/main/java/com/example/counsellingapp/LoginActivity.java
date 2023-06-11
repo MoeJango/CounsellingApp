@@ -101,7 +101,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onResponse(Call call, final Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     error.setText("An error has occurred. Please try again");
-                    System.out.println("Error: mao " + response.message());
+                    System.out.println("Error: " + response.message());
                     throw new IOException("Unexpected code " + response);
                 }
 

@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -42,9 +43,8 @@ public class ChatActivity extends AppCompatActivity {
     EditText sendText;
     ImageView sendButton;
     TextView textViewName;
-    private CountDownLatch latch = new CountDownLatch(1);
-    private static final int INITIAL_DELAY = 1;
-    private static final int INTERVAL = 10;
+    private static final int INITIAL_DELAY = 5;
+    private static final int INTERVAL = 5;
 
 
     @Override
@@ -70,18 +70,17 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if ((!sendText.getText().toString().isEmpty()) && (sendText.getText().toString().length() < 255)) {
+                    CountDownLatch latch = new CountDownLatch(1);
                     insert(myID, receiverID, sendText.getText().toString());
-                    messages.clear();
-                    initialUpdateView();
                     sendText.setText("");
+                    messages.clear();
+                    initialUpdateView(latch);
                     try {
                         latch.await();
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
                     messageAdapter.notifyDataSetChanged();
-                    System.out.println("Notify success");
-
                 }
             }
         });
@@ -95,7 +94,8 @@ public class ChatActivity extends AppCompatActivity {
             textViewName.setText("Patient " + patientNumber);
         }
 
-        initialUpdateView();
+        CountDownLatch latch = new CountDownLatch(1);
+        initialUpdateView(latch);
         try {
             latch.await();
         } catch (InterruptedException e) {
@@ -104,14 +104,16 @@ public class ChatActivity extends AppCompatActivity {
         messageAdapter = new MessageAdapter(this, messages, myID);
         chatRecyclerView.setAdapter(messageAdapter);
 
+        /*
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        Handler handler = new Handler();
+        CountDownLatch latchNew = new CountDownLatch(1);
+        // refresh messages every 5 seconds
+        ScheduledUpdater scheduledUpdater = new ScheduledUpdater(messageAdapter, handler, latchNew);
+        executor.scheduleAtFixedRate(scheduledUpdater, INITIAL_DELAY, INTERVAL, TimeUnit.SECONDS);
+        */
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleAtFixedRate(this::scheduledUpdater, INITIAL_DELAY, INTERVAL, TimeUnit.SECONDS);
-    }
 
     public void insert(String senderID, String receiverID, String message) {
         String key = senderID+"@"+receiverID;
@@ -134,12 +136,7 @@ public class ChatActivity extends AppCompatActivity {
                     throw new IOException();
                 }
                 else {
-                    ChatActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            System.out.println();
-                        }
-                    });
+                    System.out.println("Insert into database success");
                 }
                 response.close();
             }
@@ -151,7 +148,7 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    public void initialUpdateView() {
+    public void initialUpdateView(CountDownLatch latch) {
         String sentKey = myID+"@"+receiverID;
         String receivedKey = receiverID+"@"+myID;
         RequestBody formBody = new FormBody.Builder()
@@ -195,8 +192,11 @@ public class ChatActivity extends AppCompatActivity {
                             int index = ids.get(i).indexOf('@');
                             String senderID = ids.get(i).substring(0, index);
                             insertMessage(messagesResponse.get(i), senderID);
-                            System.out.println("Insert success");
+                            System.out.println("Insert into messages success");
                         }
+                    }
+                    else {
+
                     }
                 }
                 latch.countDown();
@@ -212,7 +212,8 @@ public class ChatActivity extends AppCompatActivity {
     }
 
 
-    public void updateView() {
+    public void scheduledUpdateView() {
+        messages.clear();
         String sentKey = myID+"@"+receiverID;
         String receivedKey = receiverID+"@"+myID;
         RequestBody formBody = new FormBody.Builder()
@@ -275,9 +276,40 @@ public class ChatActivity extends AppCompatActivity {
         messages.add(messageNew);
     }
 
-    public void scheduledUpdater() {
-        messages.clear();
-        updateView();
-        messageAdapter.notifyDataSetChanged();
+    public class ScheduledUpdater implements Runnable{
+
+        private MessageAdapter messageAdapter;
+        private Handler handler;
+        private CountDownLatch latch;
+
+        public ScheduledUpdater(MessageAdapter messageAdapter, Handler handler, CountDownLatch latch) {
+            this.messageAdapter = messageAdapter;
+            this.handler = handler;
+            this.latch = latch;
+        }
+
+        @Override
+        public void run() {
+            // Perform your task here
+            scheduledUpdateView();
+            latch.countDown();
+            System.out.println("scheduledUpdateView Successful");
+
+            // Wait for updateView() to complete before notifying data set changed
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    messageAdapter.notifyDataSetChanged();
+                    System.out.println("scheduledNotifySet successful");
+                }
+            });
+
+        }
     }
 }
