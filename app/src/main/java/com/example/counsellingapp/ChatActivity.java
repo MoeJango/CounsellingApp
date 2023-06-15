@@ -69,7 +69,7 @@ public class ChatActivity extends AppCompatActivity {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if ((!sendText.getText().toString().isEmpty()) && (sendText.getText().toString().length() < 255)) {
+                if ((!sendText.getText().toString().isEmpty()) && (sendText.getText().toString().length() <= 255)) {
                     CountDownLatch latch = new CountDownLatch(1);
                     insert(myID, receiverID, sendText.getText().toString());
                     sendText.setText("");
@@ -77,10 +77,11 @@ public class ChatActivity extends AppCompatActivity {
                     initialUpdateView(latch);
                     try {
                         latch.await();
+                        messageAdapter.notifyDataSetChanged();
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-                    messageAdapter.notifyDataSetChanged();
+
                 }
             }
         });
@@ -98,11 +99,12 @@ public class ChatActivity extends AppCompatActivity {
         initialUpdateView(latch);
         try {
             latch.await();
+            messageAdapter = new MessageAdapter(this, messages, myID);
+            chatRecyclerView.setAdapter(messageAdapter);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        messageAdapter = new MessageAdapter(this, messages, myID);
-        chatRecyclerView.setAdapter(messageAdapter);
+
 
         /*
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
@@ -166,6 +168,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (!response.isSuccessful()) {
+                    latch.countDown();
                     System.out.println(response.message());
                     throw new IOException();
                 }
